@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>ESCENARIO — Radiance Cascades GI</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./src/style.css" />
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.185.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.185.1/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main id="viewport" aria-label="Visor 3D del escenario"></main>
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <div class="brand-copy">
+        <strong>RADIANCE CASCADES GI</strong>
+        <span>ESCENARIO.glb · voxel GI + reflejos cone-traced</span>
+      </div>
+    </div>
+
+    <div id="status" class="status" role="status">
+      <span class="status-dot"></span>
+      <span id="status-text">Preparando iluminación global…</span>
+    </div>
+
+    <label class="action">
+      Video para PANTALLA
+      <input id="video-input" type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" />
+    </label>
+
+    <button id="capture-button" class="action" type="button">Capturar pestaña/pantalla</button>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="loader-card">
+      <span class="spinner"></span>
+      <div>
+        <strong id="loader-title">Cargando ESCENARIO.glb</strong>
+        <span id="loader-sub">Voxelizando la escena y armando las cascadas</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">Arrastrá para orbitar · rueda para zoom · click derecho para desplazar</div>
+  <div id="stats" class="stats"></div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
