@@ -28,6 +28,21 @@ export async function loadStage(url) {
   return { model, screenMesh, screen, bounds };
 }
 
+// Alterna las dos disposiciones que vienen dentro del GLB. Al ocultar la
+// raíz se ocultan también todos sus hijos, sin alterar su jerarquía original.
+export function setStageLayout(model, pianoVisible) {
+  setNamedObjectsVisible(model, 'Sketchfab_model', pianoVisible);
+  setNamedObjectsVisible(model, 'mesa', !pianoVisible);
+  setNamedObjectsVisible(model, 'dj', !pianoVisible);
+  model.updateMatrixWorld(true);
+}
+
+function setNamedObjectsVisible(model, name, visible) {
+  model.traverse((object) => {
+    if (object.name === name) object.visible = visible;
+  });
+}
+
 // El eje más delgado de la mesh es la normal de la pantalla; el signo se elige
 // apuntando hacia el centro del resto del set.
 function describeScreen(mesh, bounds) {

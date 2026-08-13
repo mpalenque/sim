@@ -3,7 +3,7 @@ import { params } from './params.js';
 import { setStatus, setLoader, showLoader, setStats, nextFrame, videoInput, captureButton } from './ui/dom.js';
 import { createGUI } from './ui/gui.js';
 import { createViewer } from './core/viewer.js';
-import { loadStage, frameCamera, disposeModel, findMirrorPlane } from './core/stage.js';
+import { loadStage, frameCamera, disposeModel, findMirrorPlane, setStageLayout } from './core/stage.js';
 import {
   loadVideoFile, startDisplayCapture, pauseScreen, getScreenTexture, applyScreenTransform
 } from './core/screen-source.js';
@@ -68,6 +68,11 @@ createGUI({
       if (!planarMirror) return;
       planarMirror.setSize(value);
       mirrorUniforms.uMirrorMap.value = planarMirror.texture;
+    },
+    onPianoToggle: async (pianoVisible) => {
+      if (!stage) return;
+      setStageLayout(stage.model, pianoVisible);
+      await rebuildGI();
     }
   }
 });
@@ -112,6 +117,7 @@ async function boot() {
 
   try {
     stage = await loadStage(MODEL_URL);
+    setStageLayout(stage.model, params.piano);
     viewer.scene.add(stage.model);
     viewer.fitLights(stage.bounds);
     viewer.applyLightingMode();

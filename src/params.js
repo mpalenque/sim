@@ -1,5 +1,9 @@
 // Configuración única de la simulación. Todo lo que toca la GUI vive acá.
 export const params = {
+  // --- Disposición del escenario ---
+  // true: piano (Sketchfab_model). false: mesa + DJ.
+  piano: true,
+
   // --- Voxelización ---
   voxelRes: 128,          // voxels en el eje más largo del volumen
   pointDensity: 2.0,      // muestras de superficie por área de voxel

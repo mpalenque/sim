@@ -8,7 +8,9 @@ const textureAverageCache = new WeakMap();
 
 export function buildPointCloud({ root, screenMesh, volumeBox, voxelDims, voxelSize, pointDensity, maxPoints }) {
   const meshes = [];
-  root.traverse((o) => { if (o.isMesh && o.geometry?.attributes?.position) meshes.push(o); });
+  root.traverse((o) => {
+    if (o.isMesh && o.geometry?.attributes?.position && isVisibleInHierarchy(o)) meshes.push(o);
+  });
 
   const voxelArea = voxelSize * voxelSize;
   const matrix = new THREE.Matrix4();
@@ -142,6 +144,13 @@ export function buildPointCloud({ root, screenMesh, volumeBox, voxelDims, voxelS
   }
 
   return sortByLayer({ count, posArr, nrmArr, uvArr, albArr, emiArr, escArr, areaArr, volumeBox, voxelDims });
+}
+
+function isVisibleInHierarchy(object) {
+  for (let current = object; current; current = current.parent) {
+    if (!current.visible) return false;
+  }
+  return true;
 }
 
 // Orden por capa Z + rangos: cada capa del volumen se dibuja con un setDrawRange,
