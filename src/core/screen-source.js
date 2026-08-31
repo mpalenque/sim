@@ -23,6 +23,16 @@ export function getScreenLabel() {
   return label;
 }
 
+export function isScreenMuted() {
+  return element?.muted ?? true;
+}
+
+export function toggleScreenMute() {
+  if (!element) return null;
+  element.muted = !element.muted;
+  return element.muted;
+}
+
 export async function loadVideoFile(file, screen, canvas) {
   requireScreen(screen);
   disposeCurrent();
@@ -30,7 +40,7 @@ export async function loadVideoFile(file, screen, canvas) {
   const video = document.createElement('video');
   video.src = URL.createObjectURL(file);
   video.loop = true;
-  video.muted = true;
+  video.muted = false;
   video.playsInline = true;
   video.preload = 'auto';
 

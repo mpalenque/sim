@@ -8,6 +8,7 @@ const loaderSubEl = document.querySelector('#loader-sub');
 const statsEl = document.querySelector('#stats');
 
 export const videoInput = document.querySelector('#video-input');
+export const audioToggleButton = document.querySelector('#audio-toggle');
 export const captureButton = document.querySelector('#capture-button');
 export const viewport = document.querySelector('#viewport');
 

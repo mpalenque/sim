@@ -11,8 +11,8 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://unpkg.com/three@0.185.1/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.185.1/examples/jsm/"
+        "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
       }
     }
   </script>
@@ -38,6 +38,8 @@
       Video para PANTALLA
       <input id="video-input" type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" />
     </label>
+
+    <button id="audio-toggle" class="action" type="button" aria-pressed="false" disabled>Silenciar video</button>
 
     <button id="capture-button" class="action" type="button">Capturar pestaña/pantalla</button>
   </div>

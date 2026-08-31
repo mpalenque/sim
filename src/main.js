@@ -1,11 +1,15 @@
 import * as THREE from 'three';
 import { params } from './params.js';
-import { setStatus, setLoader, showLoader, setStats, nextFrame, videoInput, captureButton } from './ui/dom.js';
+import {
+  setStatus, setLoader, showLoader, setStats, nextFrame,
+  videoInput, audioToggleButton, captureButton
+} from './ui/dom.js';
 import { createGUI } from './ui/gui.js';
 import { createViewer } from './core/viewer.js';
 import { loadStage, frameCamera, disposeModel, findMirrorPlane, setStageLayout } from './core/stage.js';
 import {
   loadVideoFile, startDisplayCapture, pauseScreen, getScreenTexture, applyScreenTransform
+  , isScreenMuted, toggleScreenMute
 } from './core/screen-source.js';
 import { GlobalIllumination } from './gi/index.js';
 import { patchSceneMaterials } from './gi/materials.js';
@@ -83,6 +87,7 @@ videoInput.addEventListener('change', async () => {
   try {
     const { playing } = await loadVideoFile(file, stage?.screen, viewer.renderer.domElement);
     pushScreenToGI();
+    updateAudioToggle();
     setStatus(playing
       ? `${file.name} · emisión de PANTALLA → cascadas`
       : `${file.name} listo · tocá la escena para reproducir`, 'ready');
@@ -91,12 +96,18 @@ videoInput.addEventListener('change', async () => {
   }
 });
 
+audioToggleButton.addEventListener('click', () => {
+  if (toggleScreenMute() === null) return;
+  updateAudioToggle();
+});
+
 captureButton.addEventListener('click', async () => {
   try {
     const { playing, label } = await startDisplayCapture(stage?.screen, viewer.renderer.domElement, () => {
       setStatus('Captura de pantalla finalizada', '');
     });
     pushScreenToGI();
+    updateAudioToggle();
     setStatus(playing
       ? `${label} · emisión de PANTALLA → cascadas`
       : `${label} lista · tocá la escena para reproducir`, 'ready');
@@ -196,6 +207,13 @@ function pushScreenToGI() {
     tint: material?.emissive,
     emissive: params.screenEmissive
   });
+}
+
+function updateAudioToggle() {
+  const muted = isScreenMuted();
+  audioToggleButton.disabled = false;
+  audioToggleButton.ariaPressed = String(muted);
+  audioToggleButton.textContent = muted ? 'Activar sonido' : 'Silenciar video';
 }
 
 function frame(time) {

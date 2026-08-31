@@ -101,6 +101,8 @@ canvas { display: block; }
 }
 
 .action:hover { border-color: rgba(255,180,94,.45); background: rgba(38,30,22,.9); transform: translateY(-1px); }
+.action:disabled { cursor: default; opacity: .5; }
+.action:disabled:hover { border-color: rgba(255,255,255,.1); background: rgba(11, 15, 23, .78); transform: none; }
 .action input { display: none; }
 
 /* ---------- loader ---------- */
