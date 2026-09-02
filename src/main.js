@@ -21,7 +21,7 @@ const MIRROR_MATERIAL = 'base.001';
 
 THREE.ColorManagement.enabled = true;
 
-const MODEL_URL = './ESCENARIO.glb';
+const MODEL_URL = './ESCENARIO2.glb';
 
 const viewer = createViewer();
 const gi = new GlobalIllumination(viewer.renderer, viewer.scene);
@@ -124,7 +124,7 @@ await boot();
 viewer.renderer.setAnimationLoop(frame);
 
 async function boot() {
-  setStatus('Cargando ESCENARIO.glb…');
+  setStatus('Cargando ESCENARIO2.glb…');
 
   try {
     stage = await loadStage(MODEL_URL);
@@ -149,7 +149,7 @@ async function boot() {
   } catch (error) {
     console.error(error);
     showLoader(false);
-    setStatus(`No se pudo cargar ESCENARIO.glb: ${error.message}`, 'error');
+    setStatus(`No se pudo cargar ESCENARIO2.glb: ${error.message}`, 'error');
   }
 }
 
