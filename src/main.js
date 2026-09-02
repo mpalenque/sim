@@ -43,7 +43,7 @@ specularUniforms.uSpecRoughCut.value = params.specularRoughCut;
 const caps = viewer.capabilities();
 if (!caps.floatRenderTargets) {
   specularUniforms.uSpecEnabled.value = 0;
-  setStatus('Esta GPU no permite render targets HDR: la GI no puede correr', 'error');
+  setStatus('This GPU does not support HDR render targets: GI cannot run', 'error');
 }
 
 createGUI({
@@ -89,8 +89,8 @@ videoInput.addEventListener('change', async () => {
     pushScreenToGI();
     updateAudioToggle();
     setStatus(playing
-      ? `${file.name} · emisión de PANTALLA → cascadas`
-      : `${file.name} listo · tocá la escena para reproducir`, 'ready');
+      ? `${file.name} · screen emission → cascades`
+      : `${file.name} ready · click the scene to play`, 'ready');
   } catch (error) {
     setStatus(error.message, 'error');
   }
@@ -104,15 +104,15 @@ audioToggleButton.addEventListener('click', () => {
 captureButton.addEventListener('click', async () => {
   try {
     const { playing, label } = await startDisplayCapture(stage?.screen, viewer.renderer.domElement, () => {
-      setStatus('Captura de pantalla finalizada', '');
+      setStatus('Screen capture finished', '');
     });
     pushScreenToGI();
     updateAudioToggle();
     setStatus(playing
-      ? `${label} · emisión de PANTALLA → cascadas`
-      : `${label} lista · tocá la escena para reproducir`, 'ready');
+      ? `${label} · screen emission → cascades`
+      : `${label} ready · click the scene to play`, 'ready');
   } catch (error) {
-    // El usuario cancela el selector de pestaña: no es un error real.
+    // The user cancels the tab picker: this is not a real error.
     if (error?.name !== 'NotAllowedError') setStatus(error.message, 'error');
   }
 });
@@ -124,7 +124,7 @@ await boot();
 viewer.renderer.setAnimationLoop(frame);
 
 async function boot() {
-  setStatus('Cargando ESCENARIO2.glb…');
+  setStatus('Loading ESCENARIO2.glb…');
 
   try {
     stage = await loadStage(MODEL_URL);
@@ -134,7 +134,7 @@ async function boot() {
     viewer.applyLightingMode();
     frameCamera(viewer.camera, viewer.controls, stage.bounds, stage.screen);
 
-    setLoader('Construyendo iluminación global', 'Muestreando la malla y armando el volumen de voxels');
+    setLoader('Building global illumination', 'Sampling the mesh and assembling the voxel volume');
     await nextFrame();
 
     if (caps.floatRenderTargets) {
@@ -149,14 +149,14 @@ async function boot() {
   } catch (error) {
     console.error(error);
     showLoader(false);
-    setStatus(`No se pudo cargar ESCENARIO2.glb: ${error.message}`, 'error');
+    setStatus(`Could not load ESCENARIO2.glb: ${error.message}`, 'error');
   }
 }
 
 async function rebuildGI() {
   if (!stage || !caps.floatRenderTargets) return;
   showLoader(true);
-  setLoader('Reconstruyendo iluminación global', 'Voxelizando y rearmando las cascadas');
+  setLoader('Rebuilding global illumination', 'Voxelizing and recreating the cascades');
   await nextFrame();
 
   try {
@@ -166,7 +166,7 @@ async function rebuildGI() {
     setStatus(summary(), 'ready');
   } catch (error) {
     console.error(error);
-    setStatus(`Error al construir la GI: ${error.message}`, 'error');
+    setStatus(`GI build error: ${error.message}`, 'error');
   }
 
   showLoader(false);
@@ -213,7 +213,7 @@ function updateAudioToggle() {
   const muted = isScreenMuted();
   audioToggleButton.disabled = false;
   audioToggleButton.ariaPressed = String(muted);
-  audioToggleButton.textContent = muted ? 'Activar sonido' : 'Silenciar video';
+  audioToggleButton.textContent = muted ? 'Enable sound' : 'Mute video';
 }
 
 function frame(time) {
@@ -250,8 +250,8 @@ function refreshStats() {
 
 function summary() {
   const s = gi.stats;
-  if (!s) return 'GI no disponible';
-  return `GI activa · ${s.cascadeCount} cascadas · alcance ${s.reach.toFixed(1)} m`;
+  if (!s) return 'GI unavailable';
+  return `GI active · ${s.cascadeCount} cascades · reach ${s.reach.toFixed(1)} m`;
 }
 
 // Handle de inspección desde la consola del navegador.

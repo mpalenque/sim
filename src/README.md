@@ -1,90 +1,82 @@
-# Radiance Cascades GI — estructura
+# Radiance Cascades GI — structure
 
-Esta es la versión activa de la sim. GitHub Pages la sirve desde `../index.html`;
-`../index-rc.html` se conserva como copia de la misma entrada.
+This is the active version of the sim. GitHub Pages serves it from `../index.html`;
+`../index-rc.html` is kept as a copy of the same entry point.
 
-## Qué hace
+## What it does
 
-La escena se ilumina **sólo con sus materiales emisivos**. La PANTALLA emite luz
-real: rebota sobre el set (difusa) y se refleja en los materiales pulidos
-(especular). No hay luces de estudio encendidas por defecto.
+The scene is lit **only by its emissive materials**. The SCREEN emits real light:
+it bounces around the set (diffuse) and reflects on polished materials
+(specular). No studio lights are enabled by default.
 
-## Pipeline, por actualización de GI
+## Real-time GI pipeline
 
 ```
-nube de puntos ──inyección──► volumen de voxels (RGBA16F 3D, con mips)
+point cloud ──inject──► voxel volume (RGBA16F 3D, with mips)
                                       │
-                                      ├─ trazado de conos ─► cascadas 0..N (atlas 2D)
-                                      │                            │
-                                      │                         merge ▼ (de arriba hacia abajo)
-                                      │                       cascada 0 ─► proyección SH
-                                      │                                        │
-                                      │                                   LightProbeGrid
-                                      │                                        │
-                                      │                              three.js lo aplica solo
-                                      │                              a la difusa indirecta
+                                      ├─ cone tracing ─► cascades 0..N (2D atlas)
+                                      │                           │
+                                      │                        merge ▼ (top to bottom)
+                                      │                      cascade 0 ─► SH projection
+                                      │                                      │
+                                      │                                 LightProbeGrid
+                                      │                                      │
+                                      │                               three.js applies it only
+                                      │                             to indirect diffuse materials
                                       │
-                                      └─ cone tracing por píxel ─► especular indirecta
+                                      └─ per-pixel cone tracing ─► indirect specular
 ```
 
-## Archivos
+## Files
 
-| Archivo | Rol |
+| File | Role |
 | --- | --- |
-| `main.js` | Arranque, bucle de render, cableado entre módulos |
-| `params.js` | Toda la configuración en un objeto |
-| `style.css` | Estilos de la UI |
-| `core/viewer.js` | Renderer, cámara, controles, composer, luces directas |
-| `core/stage.js` | Carga del GLB, detección de PANTALLA, encuadre |
-| `core/screen-source.js` | Video o captura de pestaña → textura emisiva de la PANTALLA, con encuadre |
-| `ui/dom.js` | Estado, loader y panel de métricas |
-| `ui/gui.js` | Panel lil-gui |
-| `gi/index.js` | Orquesta el pipeline y publica el LightProbeGrid |
-| `gi/glsl.js` | Fragmentos GLSL compartidos (cone tracing, octaédrico, SH) |
-| `gi/uniforms.js` | Uniforms compartidos entre pasadas y materiales |
-| `gi/targets.js` | Render targets 2D/3D, limpieza por capa, mips |
-| `gi/pointcloud.js` | Muestreo de la malla → puntos de superficie |
-| `gi/voxelizer.js` | Inyección de radiancia en el volumen |
-| `gi/cascades.js` | Radiance Cascades: trazado, merge y proyección a SH |
-| `gi/materials.js` | Parche de especular indirecta (voxel-GI + espejo planar) en los materiales |
-| `gi/planar-mirror.js` | Espejo planar: cámara reflejada + clip de plano oblicuo |
-| `gi/debug.js` | Vistas de inspección (voxels, ocupación, sondas) |
+| `main.js` | Boot, render loop, wiring between modules |
+| `params.js` | All configuration in one object |
+| `style.css` | UI styles |
+| `core/viewer.js` | Renderer, camera, controls, composer, direct lights |
+| `core/stage.js` | GLB loading, SCREEN detection, framing |
+| `core/screen-source.js` | Video or tab capture → emissive SCREEN texture, with framing |
+| `ui/dom.js` | Status, loader, and metric panel |
+| `ui/gui.js` | lil-gui panel |
+| `gi/index.js` | Orchestrates the pipeline and publishes the LightProbeGrid |
+| `gi/glsl.js` | Shared GLSL fragments (cone tracing, octahedral, SH) |
+| `gi/uniforms.js` | Shared uniforms across passes and materials |
+| `gi/targets.js` | 2D/3D render targets, per-layer clears, mips |
+| `gi/pointcloud.js` | Mesh sampling → surface points |
+| `gi/voxelizer.js` | Radiance injection into the volume |
+| `gi/cascades.js` | Radiance Cascades: tracing, merge, and SH projection |
+| `gi/materials.js` | Indirect specular patch (voxel GI + planar mirror) in materials |
+| `gi/planar-mirror.js` | Planar mirror: reflected camera + oblique plane clipping |
+| `gi/debug.js` | Debug views (voxels, occupancy, probes) |
 
-## Detalles que importan
+## Important details
 
-- **Sondas 2^k+1 por eje**: cada cascada muestrea una de cada dos sondas de la
-  anterior, así las grillas quedan anidadas sobre el mismo volumen.
-- **Atlas octaédrico**: promediar las 4 direcciones hijas del nivel superior es
-  una sola lectura bilineal en el centro del bloque 2×2.
-- **Difusa sin parchear shaders**: three.js r185 acepta cualquier objeto con
-  `isLightProbeGrid` y aplica su volumen SH a todos los materiales con luces.
-- **Inyección por capas**: la nube de puntos se ordena por capa Z del volumen,
-  así una sola nube alimenta las N capas con un `setDrawRange` por capa.
-- **Reflejos**: el cono se ensancha con la distancia (`minTan`) para llegar al
-  fondo de la escena con el presupuesto de pasos configurado.
-- **Encuadre de PANTALLA**: el ajuste (cover/stretch, zoom, offset, flip) vive
-  en la matriz de la textura (`texture.matrix`). El material visible la usa
-  automáticamente; la inyección de GI la replica a mano (`uScreenUV`) para que
-  la luz coincida exactamente con lo que se ve.
-- **Página web en la PANTALLA**: no hay forma de volcar un `<iframe>` a una
-  textura WebGL (aislamiento de origen cruzado). `getDisplayMedia` sí funciona:
-  el usuario elige una pestaña/ventana y su contenido llega como `MediaStream`,
-  con el mismo pipeline que un archivo de video.
-- **Espejo planar (`base.001`)**: el cono trazado sobre el voxel-GI es borroso
-  (limitado por la resolución del volumen y el presupuesto de pasos) — no
-  alcanza para un reflejo nítido de la PANTALLA. Para ese material específico
-  se agrega un espejo planar clásico (la técnica de `Reflector.js` de three.js:
-  cámara reflejada + clip de plano oblicuo de Terathon), que renderiza la
-  escena una vez más por frame desde el punto de vista reflejado. Sólo es
-  geométricamente correcto cerca de un plano real, así que en el shader se
-  mezcla con el voxel-GI según `dot(normal, uMirrorNormal)` y la distancia al
-  plano (`uMirrorFade`): domina en la tapa plana, se apaga en las partes
-  curvas (costados, patas). La captura se hace con `NoToneMapping` y color
-  space lineal — si no, quedaría tonemapeada dos veces (una al capturarla, otra
-  al componer el frame final) y se vería quemada/con el gamma mal.
-  Altura del plano y alcance ajustables en vivo desde *Espejo (base.001)*.
+- **Probes: 2^k + 1 per axis**: each cascade samples every other probe from the previous level,
+  so the grids stay nested over the same volume.
+- **Octahedral atlas**: averaging the 4 child directions from the parent level becomes a single
+  bilinear read at the center of the 2×2 block.
+- **Diffuse without shader patching**: three.js r185 accepts any object with
+  `isLightProbeGrid` and applies its SH volume to all materials using lights.
+- **Layered injection**: the point cloud is sorted by Z layer of the volume,
+  so one cloud feeds all N layers with a `setDrawRange` per layer.
+- **Reflections**: the cone widens with distance (`minTan`) to reach the scene depth under the configured
+  step budget.
+- **SCREEN framing**: the fit (cover/stretch, zoom, offset, flip) lives in the texture matrix
+  (`texture.matrix`). The visible material uses it automatically; GI injection mirrors it manually
+  (`uScreenUV`) so the emitted light matches what the camera sees.
+- **Web page on the SCREEN**: there is no safe way to push an `<iframe>` into a WebGL texture
+  (cross-origin isolation). `getDisplayMedia` does work: the user chooses a tab/window and its
+  content arrives as a `MediaStream`, using the same pipeline as a video file.
+- **Planar mirror (`base.001`)**: the cone-traced voxel GI is fuzzy and limited by volume resolution
+  and step budget — it is not enough for a sharp SCREEN reflection. For that material, a classic planar
+  mirror is added (three.js `Reflector.js` approach: reflected camera + Terathon oblique plane clipping),
+  which renders the scene again each frame from the reflected viewpoint. It is only geometrically correct
+  near a real plane, so the shader blends it with voxel GI using `dot(normal, uMirrorNormal)` and the
+  plane distance (`uMirrorFade`): it dominates on the flat face and fades on curved parts (sides, legs).
+  Capture uses `NoToneMapping` and linear color space — otherwise it would be tonemapped twice and would appear saturated.
+  Plane height and reach are adjustable live from the Mirror panel.
 
-## Consola
+## Console
 
-`window.SIM` expone `{ params, gi, viewer, stage, rebuildGI }` para inspeccionar
-o forzar una reconstrucción a mano.
+`window.SIM` exposes `{ params, gi, viewer, stage, rebuildGI }` for inspection or manual rebuilds.

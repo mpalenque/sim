@@ -25,34 +25,34 @@
       <span class="brand-mark"></span>
       <div class="brand-copy">
         <strong>RADIANCE CASCADES GI</strong>
-        <span>ESCENARIO2.glb · voxel GI + reflejos cone-traced</span>
+        <span>ESCENARIO2.glb · voxel GI + cone-traced reflections</span>
       </div>
     </div>
 
     <div id="status" class="status" role="status">
       <span class="status-dot"></span>
-      <span id="status-text">Preparando iluminación global…</span>
+      <span id="status-text">Preparing global illumination…</span>
     </div>
 
     <label class="action">
-      Video para PANTALLA
+      Screen video
       <input id="video-input" type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" />
     </label>
 
-    <button id="capture-button" class="action" type="button">Capturar pestaña/pantalla</button>
+    <button id="capture-button" class="action" type="button">Capture tab/screen</button>
   </div>
 
   <div id="loading" class="loading">
     <div class="loader-card">
       <span class="spinner"></span>
       <div>
-        <strong id="loader-title">Cargando ESCENARIO2.glb</strong>
-        <span id="loader-sub">Voxelizando la escena y armando las cascadas</span>
+        <strong id="loader-title">Loading ESCENARIO2.glb</strong>
+        <span id="loader-sub">Voxelizing the scene and building the cascades</span>
       </div>
     </div>
   </div>
 
-  <div class="hint">Arrastrá para orbitar · rueda para zoom · click derecho para desplazar</div>
+  <div class="hint">Drag to orbit · scroll to zoom · right-click to pan</div>
   <div id="stats" class="stats"></div>
 
   <script type="module" src="./src/main.js"></script>
